@@ -7,9 +7,7 @@
     <groupId>io.openliberty.guides</groupId>
     <artifactId>guide-getting-started</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <!--
     <packaging>war</packaging>
-    -->
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -21,6 +19,33 @@
         <liberty.bootstrap.default>9080</liberty.bootstrap.default>
         <liberty.var.default.https.port>9443</liberty.var.default.https.port>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>test-env</name>
+                </property>
+            </activation>
+            <properties>
+                <environment>test</environment>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>prod-env</name>
+                </property>
+            </activation>
+            <properties>
+                <environment>prod</environment>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencies>
         <!-- Provided dependencies -->
@@ -66,6 +91,9 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
+        <filters> 
+            <filter>${project.basedir}/src/main/filters/${environment}.properties</filter>
+        </filters>
         <plugins>
             <!-- Enable liberty-maven plugin -->
             <!-- tag::libertyMavenPlugin[] -->
@@ -95,6 +123,31 @@
                         <http.port>${liberty.var.default.http.port}</http.port>
                     </systemPropertyVariables>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <!-- This location can persist across a server recreate, where the refresh can annoyingly wipe out your earlier copy -->
+                            <outputDirectory>target/liberty/wlp/usr/shared/config</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/filtered-config</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
