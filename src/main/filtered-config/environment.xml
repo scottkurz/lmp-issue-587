@@ -1,5 +1,5 @@
 <server description="environment">
-    <!-- Expect to come from filter -->
     <variable name="tidal.url" value="${tidal.url}"/>
+    <variable name="project.artifactId" value="${project.artifactId}"/>
 </server>
 
